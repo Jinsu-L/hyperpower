@@ -5,13 +5,13 @@ const toHex = (str) => Color(nameToHex(str)).hexString();
 const values = require('lodash.values');
 
 // Constants for the particle simulation.
-const MAX_PARTICLES = 500;
-const PARTICLE_NUM_RANGE = () => 5 + Math.round(Math.random() * 5);
-const PARTICLE_GRAVITY = 0.075;
+const MAX_PARTICLES = 5000;
+const PARTICLE_NUM_RANGE = () => 50 + Math.round(Math.random() * 5);
+const PARTICLE_GRAVITY = 0.0;
 const PARTICLE_ALPHA_FADEOUT = 0.96;
 const PARTICLE_VELOCITY_RANGE = {
-  x: [-1, 1],
-  y: [-3.5, -1.5]
+  x: [-10, 10],
+  y: [-10, 10]
 };
 
 // Our extension's custom redux middleware. Here we can intercept redux actions and respond to them.
@@ -154,7 +154,7 @@ exports.decorateTerm = (Term, { React, notify }) => {
         particle.y += particle.velocity.y;
         particle.alpha *= PARTICLE_ALPHA_FADEOUT;
         this._canvasContext.fillStyle = `rgba(${particle.color.join(',')}, ${particle.alpha})`;
-        this._canvasContext.fillRect(Math.round(particle.x - 1), Math.round(particle.y - 1), 3, 3);
+        this._canvasContext.fillRect(Math.round(particle.x - 1), Math.round(particle.y - 1), 30, 30);
       });
       this._particles = this._particles
         .slice(Math.max(this._particles.length - MAX_PARTICLES, 0))
@@ -165,9 +165,10 @@ exports.decorateTerm = (Term, { React, notify }) => {
     // Pushes `PARTICLE_NUM_RANGE` new particles into the simulation.
     _spawnParticles (x, y) {
       // const { colors } = this.props;
-      const colors = this.props.wowMode
-        ? values(this.props.colors).map(toHex)
-        : [toHex(this.props.cursorColor)];
+      //const colors = this.props.wowMode
+      //  ? values(this.props.colors).map(toHex)
+      //  : [toHex(this.props.cursorColor)];
+      const colors =values(this.props.colors).map(toHex)
       const numParticles = PARTICLE_NUM_RANGE();
       for (let i = 0; i < numParticles; i++) {
         const colorCode = colors[i % colors.length];
@@ -200,7 +201,7 @@ exports.decorateTerm = (Term, { React, notify }) => {
     // to the terminal container.
     _shake () {
       // TODO: Maybe we should do this check in `_onCursorChange`?
-      if(!this.props.wowMode) return;
+      //if(!this.props.wowMode) return;
 
       const intensity = 1 + 2 * Math.random();
       const x = intensity * (Math.random() > 0.5 ? -1 : 1);
@@ -210,8 +211,17 @@ exports.decorateTerm = (Term, { React, notify }) => {
         if (this._div) this._div.style.transform = '';
       }, 75);
     }
+    _changeFontColor() { 
+      const colors =values(this.props.colors).map(toHex);
+      const colorCode = colors[Math.round(Math.random() * 10) % colors.length];
+      const r = colorCode.slice(1, 3);
+      const g = colorCode.slice(3, 5);
+      const b = colorCode.slice(5, 7);
+      document.getElementsByClassName("header_appTitle")[0].innerHTML = "<p style='color:#"+ r+""+g+""+b +";'>Hyper</p>";
+    }
 
     _onCursorChange () {
+      this._changeFontColor();
       this._shake();
       // Get current coordinates of the cursor relative the container and 
       // spawn new articles.
